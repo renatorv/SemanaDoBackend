@@ -14,24 +14,24 @@ class UserResource extends Resource {
       ];
 
   FutureOr<Response> _getAllUsers() {
-    return Response.ok('ok');
+    return Response.ok('[_getAllUsers] ok');
   }
 
   FutureOr<Response> _getUserById(ModularArguments arguments) {
-    return Response.ok('User: ${arguments.params['id']}');
+    return Response.ok('[_getUserById] User: ${arguments.params['id']}');
   }
 
   FutureOr<Response> _createUser(ModularArguments arguments) {
     // Receber informações JSon
-    return Response.ok('User: ${arguments.data}');
+    return Response.ok('[_createUser] Create User: ${arguments.data}');
   }
 
-    FutureOr<Response> _updateUser(ModularArguments arguments) {
+  FutureOr<Response> _updateUser(ModularArguments arguments) {
     // Receber informações JSon
-    return Response.ok('User: ${arguments.data}');
+    return Response.ok('[_updateUser] Updated User: ${arguments.data}');
   }
 
-    FutureOr<Response> _deleteUser(ModularArguments arguments) {
-    return Response.ok('User: ${arguments.params['id']}');
+  FutureOr<Response> _deleteUser(ModularArguments arguments) {
+    return Response.ok('[_deleteUser] Deleted User: ${arguments.params['id']}');
   }
 }
