@@ -7,7 +7,25 @@ startShelfModular() async {
     module: AppModule(),
     middlewares: [
       logRequests(),
+      jsonResponse(),
     ],
   );
   return handler;
+}
+
+Middleware jsonResponse() {
+  return (handler) {
+    return (request) async {
+      var response = await handler(request);
+
+      response = response.change(
+        headers: {
+          'content-type': 'application/json',
+          ...response.headers,
+        },
+      );
+
+      return response;
+    };
+  };
 }

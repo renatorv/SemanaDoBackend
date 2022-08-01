@@ -15,8 +15,10 @@ class UserResource extends Resource {
         Route.delete('/user/:id', _deleteUser),
       ];
 
+  // GET ALL USERS
   FutureOr<Response> _getAllUsers(Injector injector) async {
     //
+    //usar a interface RemoteDatabase e não sua implementação PostgresDatabase
     final database = injector.get<RemoteDatabase>();
 
     //
@@ -29,6 +31,7 @@ class UserResource extends Resource {
     return Response.ok(jsonEncode(listUsers));
   }
 
+  // GET USER BY ID
   FutureOr<Response> _getUserById(
       ModularArguments arguments, Injector injector) async {
     final id = arguments.params['id'];
@@ -47,17 +50,70 @@ class UserResource extends Resource {
     return Response.ok(jsonEncode(userMap));
   }
 
-  FutureOr<Response> _createUser(ModularArguments arguments) {
-    // Receber informações JSon
-    return Response.ok('[_createUser] Create User: ${arguments.data}');
+  // CREATE
+  FutureOr<Response> _createUser(
+      ModularArguments arguments, Injector injector) async {
+    //
+    final userParams = (arguments.data as Map).cast<String, dynamic>();
+    //
+    // remover o campo id caso ele tenha vindo
+    userParams.remove('id');
+
+    final db = injector.get<RemoteDatabase>();
+
+    //
+    final res = await db.query(
+        'INSERT INTO "User" (name, email, password) VALUES (@name, @email, @password) RETURNING id, name, email, role;',
+        variables: userParams);
+
+    //
+    final userMap = res.map((e) => e['User']).first;
+
+    return Response.ok(jsonEncode(userMap));
   }
 
-  FutureOr<Response> _updateUser(ModularArguments arguments) {
-    // Receber informações JSon
-    return Response.ok('[_updateUser] Updated User: ${arguments.data}');
+  // UPDATE
+  FutureOr<Response> _updateUser(
+      ModularArguments arguments, Injector injector) async {
+    //
+    final userParams = (arguments.data as Map).cast<String, dynamic>();
+    //
+
+    final db = injector.get<RemoteDatabase>();
+
+    final columns = userParams.keys
+        .where((key) => key != 'id' || key != 'password')
+        .map((key) => '$key=@$key')
+        .toList();
+
+    final query =
+        'UPDATE "User" SET ${columns.join(',')} WHERE id=@id RETURNING id, name, email, role;';
+
+    //
+    final res = await db.query(
+      query,
+      variables: userParams,
+    );
+
+    //
+    final userMap = res.map((e) => e['User']).first;
+
+    return Response.ok(jsonEncode(userMap));
   }
 
-  FutureOr<Response> _deleteUser(ModularArguments arguments) {
-    return Response.ok('[_deleteUser] Deleted User: ${arguments.params['id']}');
+  // DELETE
+  FutureOr<Response> _deleteUser(
+      ModularArguments arguments, Injector injector) async {
+    final id = arguments.params['id'];
+    final db = injector.get<RemoteDatabase>();
+
+    //
+    await db.query('DELETE FROM "User" WHERE id = @id;', variables: {
+      'id': id,
+    });
+
+    // Testar res de alguma forma para confirmar se realmente foi deletado?
+
+    return Response.ok(jsonEncode({'message': 'deleted $id'}));
   }
 }
