@@ -1,3 +1,5 @@
+import 'package:backend/src/core/services/bcrypt/bcrypt_service.dart';
+import 'package:backend/src/core/services/bcrypt/bcrypt_service_impl.dart';
 import 'package:backend/src/core/services/database/postgres/postgres_database.dart';
 import 'package:backend/src/core/services/database/remote_database.dart';
 import 'package:backend/src/core/services/dot_env/dot_env_service.dart';
@@ -11,9 +13,8 @@ class AppModule extends Module {
   @override
   List<Bind> get binds => [
         Bind.instance<DotEnvService>(DotEnvService.instance),
-        Bind.singleton<RemoteDatabase>(
-          (i) => PostgresDatabase(i()),
-        ),
+        Bind.singleton<RemoteDatabase>((i) => PostgresDatabase(i())),
+        Bind.singleton<BcryptService>((i) => BcryptServiceImpl()),
       ];
 
   @override
